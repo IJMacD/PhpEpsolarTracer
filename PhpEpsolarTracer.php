@@ -46,20 +46,20 @@ class PhpEpsolarTracer
 		"PV array voltage",     			// 3100
 		"PV array current", 				// 3101
 		"PV array power",        			// 3102-3103
-		"Battery voltage",					// 3104 
+		"Battery voltage",				// 3104 
 		"Battery charging current",			// 3105
 		"Battery charging power" , 			// 3106-3107
-		"Load voltage",						// 310C
-		"Load current",						// 310D
-		"Load power",						// 310E-310F				
+		"Load voltage",					// 310C
+		"Load current",					// 310D
+		"Load power",					// 310E-310F				
 		"Battery temperature",				// 3110
 		"Charger temperature", 				// 3111
 		"Heat sink temperature",  			// 3112		
-		"Battery SOC", 						// 311A
-		"Remote battery temperature", 		// 311B
-		"System rated voltage",  			// 311C
-		"Battery status",					// 3200
-		"Equipment status",					// 3201						
+		"Battery SOC", 					// 311A
+		"Remote battery temperature", 			// 311B
+		"System rated voltage",  			// 311D
+		"Battery status",				// 3200
+		"Equipment status",				// 3201						
 	);
 	
 	// Define names for "Statistical parameter" registers
@@ -288,8 +288,8 @@ class PhpEpsolarTracer
 		$result2=$this->tracer->getResponse(false,1,2);
 		if (!$result2) return 0;			
 		$result=array_merge($result1,$result2);		
-		$this->realtimeData = $this->convertData($result,array(2,6,10,14),array(16,17,18,19,21));
-		$this->removeUnused($this->realtimeData,array(9,10,11,15,21));
+		$this->realtimeData = $this->convertData($result,array(2,6,14),array(16,17,18,19,21));
+		$this->removeUnused($this->realtimeData,array(6,7,8,9,19,21));
 		$this->realtimeData = array_map(array($this,'divide'),$this->realtimeData,$this->realtimeDiv);
 		if (count($this->realtimeData) != 17) return 0;
 		return 1;			
