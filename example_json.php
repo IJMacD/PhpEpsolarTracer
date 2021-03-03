@@ -1,7 +1,5 @@
 <?php
 
-use function PHPSTORM_META\map;
-
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 /*
@@ -164,80 +162,92 @@ $fields = array(
 
 $data = array();
 
-$tracer->getInfoData();
-fillData($data, "info", $tracer->infoData);
+if ($tracer->getInfoData()) {
+	fillData($data, "info", $tracer->infoData);
+}
 
-$tracer->getRatedData();
-fillData($data, "rated", $tracer->ratedData);
+if ($tracer->getRatedData()) {
+	fillData($data, "rated", $tracer->ratedData);
+}
 
-$tracer->getRealtimeData();
-fillData($data, "real_time", $tracer->realtimeData);
+if ($tracer->getRealtimeData()) {
+	fillData($data, "real_time", $tracer->realtimeData);
+}
 
-$tracer->getStatData();
-fillData($data, "statistics", $tracer->statData);
+if ($tracer->getStatData()) {
+	fillData($data, "statistics", $tracer->statData);
+}
 
-$tracer->getSettingData();
-fillData($data, "settings", $tracer->settingData);
+if ($tracer->getSettingData()) {
+	fillData($data, "settings", $tracer->settingData);
+}
 
-$tracer->getCoilData();
-fillData($data, "coils", $tracer->coilData);
+if ($tracer->getCoilData()) {
+	fillData($data, "coils", $tracer->coilData);
+}
 
-$tracer->getDiscreteData();
-fillData($data, "discrete", $tracer->discreteData);
+if ($tracer->getDiscreteData()) {
+	fillData($data, "discrete", $tracer->discreteData);
+}
 
-$batt_status = $tracer->realtimeData[15];
-$charge_status = $tracer->realtimeData[16];
+if (isset($tracer->realtimeData[15])) {
+	$batt_status = $tracer->realtimeData[15];
+	$charge_status = $tracer->realtimeData[16];
 
-$batt_status_volt = array(
-	"NORMAL",
-	"OVER_VOLT",
-	"UNDER_VOLT",
-	"LOW_DISCONNECT",
-	"FAULT"
-)[$batt_status & 7];
+	$batt_status_volt = array(
+		"NORMAL",
+		"OVER_VOLT",
+		"UNDER_VOLT",
+		"LOW_DISCONNECT",
+		"FAULT"
+	)[$batt_status & 7];
 
-$batt_status_temp = array(
-	"NORMAL",
-	"OVER_TEMP",
-	"BELOW_TEMP",
-)[($batt_status >> 4) & 15];
+	$batt_status_temp = array(
+		"NORMAL",
+		"OVER_TEMP",
+		"BELOW_TEMP",
+	)[($batt_status >> 4) & 15];
 
-$charge_phase = array(
-	"NOT_CHARGING",
-	"FLOAT",
-	"BOOST",
-	"EQUALIZATION"
-)[($charge_status >> 2) & 3];
+	$charge_phase = array(
+		"NOT_CHARGING",
+		"FLOAT",
+		"BOOST",
+		"EQUALIZATION"
+	)[($charge_status >> 2) & 3];
 
-$pv_volt_status = array(
-	"NORMAL",
-	"NOT_CONNECTED",
-	"OVER_VOLT",
-	"ERROR"
-)[($charge_status >> 14) & 3];
+	$pv_volt_status = array(
+		"NORMAL",
+		"NOT_CONNECTED",
+		"OVER_VOLT",
+		"ERROR"
+	)[($charge_status >> 14) & 3];
 
-$data["status"] = array(
-	"battery_status" => array(
-		"battery_status_voltage" => $batt_status_volt,
-		"battery_status_temperature" => $batt_status_temp,
-		"battery_internal_resistance_abnormal" => (bool)($batt_status & 256),
-		"battery_rated_voltage_error" => (bool)($batt_status & 32768),
-	),
-	"charging_status" => array(
-		"running" => (bool)($charge_status & 1),
-		"fault" => (bool)($charge_status & 2),
-		"charging_phase" => $charge_phase,
-		"pv_short" => (bool)($charge_status & 16),
-		"load_mosfet_short" => (bool)($charge_status & 128),
-		"load_short" => (bool)($charge_status & 256),
-		"load_over_current" => (bool)($charge_status & 512),
-		"pv_over_current" => (bool)($charge_status & 1024),
-		"anti_reverse_mosfet_short" => (bool)($charge_status & 2048),
-		"charging_or_anti_reverse_mosfet_short" => (bool)($charge_status & 4096),
-		"charging_mosfet_short" => (bool)($charge_status & 8192),
-		"pv_voltage_status" => $pv_volt_status,
-	),
-);
+	$sett = $tracer->settingData;
+
+	$data["status"] = array(
+		"date_time" => sprintf("20%02d-%02d-%02dT%02d:%02d:%02d", $sett[20], $sett[19], $sett[18], $sett[17], $sett[16], $sett[15]),
+		"battery_status" => array(
+			"battery_status_voltage" => $batt_status_volt,
+			"battery_status_temperature" => $batt_status_temp,
+			"battery_internal_resistance_abnormal" => (bool)($batt_status & 256),
+			"battery_rated_voltage_error" => (bool)($batt_status & 32768),
+		),
+		"charging_status" => array(
+			"running" => (bool)($charge_status & 1),
+			"fault" => (bool)($charge_status & 2),
+			"charging_phase" => $charge_phase,
+			"pv_short" => (bool)($charge_status & 16),
+			"load_mosfet_short" => (bool)($charge_status & 128),
+			"load_short" => (bool)($charge_status & 256),
+			"load_over_current" => (bool)($charge_status & 512),
+			"pv_over_current" => (bool)($charge_status & 1024),
+			"anti_reverse_mosfet_short" => (bool)($charge_status & 2048),
+			"charging_or_anti_reverse_mosfet_short" => (bool)($charge_status & 4096),
+			"charging_mosfet_short" => (bool)($charge_status & 8192),
+			"pv_voltage_status" => $pv_volt_status,
+		),
+	);
+}
 
 header("Content-Type: application/json");
 header("Access-Control-Allow-Origin: *");
