@@ -162,32 +162,30 @@ $fields = array(
 
 $data = array();
 
-if ($tracer->getInfoData()) {
-	fillData($data, "info", $tracer->infoData);
-}
+$sections = array(
+	"info" 			=> array("getInfoData", "infoData"),
+	"rated" 		=> array("getRatedData", "ratedData"),
+	"real_time" 	=> array("getRealtimeData", "realtimeData"),
+	"statistics" 	=> array("getStatData", "statData"),
+	"settings" 		=> array("getSettingData", "settingData"),
+	"coils" 		=> array("getCoilData", "coilData"),
+	"discrete" 		=> array("getDiscreteData", "discreteData"),
+);
 
-if ($tracer->getRatedData()) {
-	fillData($data, "rated", $tracer->ratedData);
-}
+foreach ($sections as $section => $spec) {
+	list ($fn, $dataArray) = $spec;
 
-if ($tracer->getRealtimeData()) {
-	fillData($data, "real_time", $tracer->realtimeData);
-}
-
-if ($tracer->getStatData()) {
-	fillData($data, "statistics", $tracer->statData);
-}
-
-if ($tracer->getSettingData()) {
-	fillData($data, "settings", $tracer->settingData);
-}
-
-if ($tracer->getCoilData()) {
-	fillData($data, "coils", $tracer->coilData);
-}
-
-if ($tracer->getDiscreteData()) {
-	fillData($data, "discrete", $tracer->discreteData);
+	if ($tracer->$fn()) {
+		fillData($data, $section, $tracer->$dataArray);
+	} else {
+		// Try again for one failure
+		if ($tracer->$fn()) {
+			fillData($data, $section, $tracer->$dataArray);
+		} else {
+			// Fail completely for two failures
+			fail();
+		}
+	}
 }
 
 if (isset($tracer->realtimeData[15])) {
@@ -247,6 +245,8 @@ if (isset($tracer->realtimeData[15])) {
 			"pv_voltage_status" => $pv_volt_status,
 		),
 	);
+} else {
+	fail();
 }
 
 header("Content-Type: application/json");
@@ -262,4 +262,9 @@ function fillData (&$data, $field, $array) {
 	foreach ($array as $i => $value) {
 		$data[$field][$fields[$field][$i]] = $value;
 	}
+}
+
+function fail () {
+	header("HTTP/1.1 500 Server Error");
+	exit;
 }
