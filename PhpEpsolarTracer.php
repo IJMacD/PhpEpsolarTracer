@@ -311,9 +311,11 @@ class PhpEpsolarTracer
 		if (!$result2) return 0;
 		$result=array_merge($result1,$result2);
 		$this->realtimeData = $this->convertData($result,array(2,6,14),array(16,17,18,19,21));
-		$this->removeUnused($this->realtimeData,array(6,7,8,9,19,21));
+		// var_dump($this->realtimeData);
+		$this->removeUnused($this->realtimeData,array(6,7,8,9,19,22));
 		$this->realtimeData = array_map(array($this,'divide'),$this->realtimeData,$this->realtimeDiv);
 		if (count($this->realtimeData) != 17) return 0;
+		// var_dump($this->realtimeData);
 		return 1;
 	}
 
@@ -326,6 +328,7 @@ class PhpEpsolarTracer
 		$this->removeUnused($this->statData,array(13,14,15));
 		$this->statData = array_map(array($this,'divide'),$this->statData,$this->statDiv);
 		if (count($this->statData) != 16) return 0;
+		// var_dump($this->statData);
 		return 1;
 	}
 
@@ -384,6 +387,14 @@ class PhpEpsolarTracer
 		$crc = CRC16::calculate($msgBytes);
 		$crcBytes = chr($crc & 0xFF).chr(($crc >> 8) & 0xFF);
 		$this->tracer->sendRawQuery($msgBytes.$crcBytes,false);
+		// debug_bytes($msgBytes.$crcBytes);
 		return 1;
 	}
+}
+
+function debug_bytes ($string) {
+	for ($i = 0; $i < strlen($string); $i++) {
+		printf("%02X ", ord($string[$i]));
+	}
+	printf("\n");
 }

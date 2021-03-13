@@ -266,5 +266,6 @@ function fillData (&$data, $field, $array) {
 
 function fail () {
 	header("HTTP/1.1 500 Server Error");
+	header("Access-Control-Allow-Origin: *");
 	exit;
 }
